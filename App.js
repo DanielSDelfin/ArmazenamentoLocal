@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {AsyncStorage} from 'react-native-async-storage/async-storage';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, A } from "react-native";
+import { FlatList ,StyleSheet, Text, TextInput, TouchableOpacity, View, A } from "react-native";
 
  
  
@@ -8,13 +8,26 @@ export default function App() {
  
   const[nomeProduto, setNomeProduto] = useState('')
   const[precoProduto, setPrecoProduto] = useState('')
+  const[listProdutos,setListProdutos] = useState ([])
   async function salvar(){
-    await AsyncStorage.setItem('Produtos', nomeProduto+precoProduto)
-    alert('Produto Cadastrado')
+    let produtos= []
+    let tempProdutos = []
+
+    tempProdutos = JSON.parse(await AsyncStorage.getItem("Produtos"))
+    tempProdutos.map(item=>{
+      produtos.push(item)
+    })
+ produtos.push({nome:nomeProduto, preco:precoProduto})
+
+ await AsyncStorage.setItem("Produtos", JSON.stringify(produtos))
+ alert('PRODUTO CADASTRADO')
+
  }
+
  async function buscarDasdos(){
   const p = await AsyncStorage.getItem("Produtos")
-  console.log(p)
+  console.log(JSON(p))
+  setListProdutos(JSON.parse(p))
  }
   return (
     <View style={styles.container}>
@@ -29,6 +42,16 @@ export default function App() {
       <TouchableOpacity style={styles.btn} onPress={buscarDasdos}>
         <Text style={{color: '#fff', fontSize: 12}}>Buscar Dados</Text>
       </TouchableOpacity>
+
+      <FlatList
+          data = {listProdutos}
+          renderItem={({item})=>{
+            return(
+              <Text>{item.nome}</Text>
+            )
+          }}
+      />
+
     </View>
   );
 }
